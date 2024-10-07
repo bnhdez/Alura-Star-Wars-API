@@ -8,7 +8,7 @@ import java.net.http.HttpResponse;
 
 public class ConsultaPelicula {
 
-    Pelicula buscaPelicula(int numeroDePelicula){
+    public Pelicula buscaPelicula(int numeroDePelicula){
         URI direccion = URI.create("https://swapi.py4e.com/api/films/" + numeroDePelicula + "/");
 
         HttpClient client = HttpClient.newHttpClient();
@@ -16,27 +16,22 @@ public class ConsultaPelicula {
                 .uri(direccion)
                 .build();
 
-        HttpResponse<String> response = null;
         try {
-            response = client
+            HttpResponse<String> response = client
                     .send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.body().contains("Not found")) {
-                System.out.println("Pelicula no encontrada");
-                return null;
+            // Imprime el cuerpo de la respuesta para depurar
+            System.out.println("Cuerpo de la respuesta: " + response.body());
+
+            // Intenta deserializar la respuesta a un objeto Pelicula
+            Pelicula pelicula = new Gson().fromJson(response.body(), Pelicula.class);
+            if (pelicula == null) {
+                System.out.println("La deserialización falló");
             }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+
+            return pelicula;
+        } catch (Exception e) {
+            throw new RuntimeException("No encontre esa pelicula");
         }
 
-        // Imprime el cuerpo de la respuesta para depurar
-        System.out.println("Cuerpo de la respuesta: " + response.body());
-
-        // Intenta deserializar la respuesta a un objeto Pelicula
-        Pelicula pelicula = new Gson().fromJson(response.body(), Pelicula.class);
-        if (pelicula == null) {
-            System.out.println("La deserialización falló");
-        }
-
-        return pelicula;
     }
 }
